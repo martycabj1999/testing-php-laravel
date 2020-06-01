@@ -15,6 +15,7 @@ class PostControllerTest extends TestCase
 
     public function test_store()
     {
+        //Descomentar la linea de abajo para ver errores mas detallados
         //$this->withoutExceptionHandling();
         $user = factory(User::class)->create();
 
