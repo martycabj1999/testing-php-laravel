@@ -17,12 +17,16 @@ class PostControllerTest extends TestCase
     {
         //Descomentar la linea de abajo para ver errores mas detallados
         //$this->withoutExceptionHandling();
+
+        //Crea un usuario
         $user = factory(User::class)->create();
 
+        //Recibe el acto de un usuario a la API y envia un array con title
         $response = $this->actingAs($user, 'api')->json('POST', '/api/posts', [
             'title' => 'El post de prueba'
         ]);
 
+        //Verifica la estructura del JSONy luego devuelve un 200
         $response->assertJsonStructure(['id', 'title', 'created_at', 'updated_at'])
             ->assertJson(['title' => 'El post de prueba'])
             ->assertStatus(201); //OK, creado un recurso
@@ -38,7 +42,7 @@ class PostControllerTest extends TestCase
             'title' => ''
         ]);
         
-        //Estatus HTTP 422
+        //Status HTTP 422
         $response->assertStatus(422) 
             ->assertJsonValidationErrors('title');
     }
@@ -78,6 +82,7 @@ class PostControllerTest extends TestCase
             ->assertJson(['title' => 'nuevo'])
             ->assertStatus(200); //OK
 
+        //Verifica que exista en la BD
         $this->assertDatabaseHas('posts', ['title' => 'nuevo']);
     }
 
@@ -90,8 +95,9 @@ class PostControllerTest extends TestCase
         $response = $this->actingAs($user, 'api')->json('DELETE', "/api/posts/$post->id");
 
         $response->assertSee(null)
-            ->assertStatus(204); //Sin contenido...
+            ->assertStatus(204); //Verifica que no reciba nada y devuelva 204 sin contenido
 
+        //Verifica que no exista ya en la BD
         $this->assertDatabaseMissing('posts', ['id' => $post->id]);
     }
 
@@ -112,6 +118,7 @@ class PostControllerTest extends TestCase
 
     public function test_guest()
     {
+        //Verifica que si el usuario no esta autenticado devuelva un 401
         $this->json('GET',    '/api/posts')->assertStatus(401);
         $this->json('POST',   '/api/posts')->assertStatus(401);
         $this->json('GET',    '/api/posts/1000')->assertStatus(401);
